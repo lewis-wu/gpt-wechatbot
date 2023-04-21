@@ -20,7 +20,13 @@ func AddHeaderForGpt(req *http.Request) {
 }
 
 func GetGptClient() *http.Client {
+	if client != nil {
+		return client
+	}
 	if atomic.CompareAndSwapInt32(&mutex, 0, 1) {
+		if client != nil {
+			return client
+		}
 		proxy := config.LoadConfig().Proxy
 		timeOut := config.LoadConfig().GptTimeOut
 		if timeOut <= 0 {
