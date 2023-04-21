@@ -1,4 +1,8 @@
 {
   "api_key": "your api key",
-  "auto_pass": true
+  "auto_pass": true,
+  "proxy":"",
+  "chat_max_context": 0,
+  "chat_ttl_time": 0,
+  "gpt_time_out": 0
 }

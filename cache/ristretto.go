@@ -9,7 +9,7 @@ import (
 
 const SingleKeyCost = 1
 const DefaultTTLTime = 5 * time.Minute
-const DefaultChatMaxContext = 1
+const DefaultChatMaxContext = 2
 
 var cache *ristretto.Cache
 var chatMaxContext int
