@@ -6,6 +6,8 @@
 *.dylib
 .idea/
 storage.json
+config.json
+config.dev.json
 
 # Test binary, built with `go test -c`
 *.test

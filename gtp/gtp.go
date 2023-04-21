@@ -4,12 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/869413421/wechatbot/config"
-	"io/ioutil"
+	"github.com/869413421/wechatbot/https"
+	"io"
 	"log"
 	"net/http"
 )
-
-const BASEURL = "https://api.openai.com/v1/"
 
 // ChatGPTResponseBody 请求体
 type ChatGPTResponseBody struct {
@@ -36,10 +35,10 @@ type ChatGPTRequestBody struct {
 }
 
 // Completions gtp文本模型回复
-//curl https://api.openai.com/v1/completions
-//-H "Content-Type: application/json"
-//-H "Authorization: Bearer your chatGPT key"
-//-d '{"model": "text-davinci-003", "prompt": "give me good song", "temperature": 0, "max_tokens": 7}'
+// curl https://api.openai.com/v1/completions
+// -H "Content-Type: application/json"
+// -H "Authorization: Bearer your chatGPT key"
+// -d '{"model": "text-davinci-003", "prompt": "give me good song", "temperature": 0, "max_tokens": 7}'
 func Completions(msg string) (string, error) {
 	requestBody := ChatGPTRequestBody{
 		Model:            "text-davinci-003",
@@ -56,22 +55,19 @@ func Completions(msg string) (string, error) {
 		return "", err
 	}
 	log.Printf("request gtp json string : %v", string(requestData))
-	req, err := http.NewRequest("POST", BASEURL+"completions", bytes.NewBuffer(requestData))
+	req, err := http.NewRequest("POST", config.BASEURL+"completions", bytes.NewBuffer(requestData))
 	if err != nil {
 		return "", err
 	}
-
-	apiKey := config.LoadConfig().ApiKey
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+apiKey)
-	client := &http.Client{}
+	https.AddHeaderFroGpt(req)
+	client := https.GetGptClient()
 	response, err := client.Do(req)
 	if err != nil {
 		return "", err
 	}
 	defer response.Body.Close()
 
-	body, err := ioutil.ReadAll(response.Body)
+	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		return "", err
 	}
