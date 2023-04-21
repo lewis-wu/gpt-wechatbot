@@ -21,11 +21,11 @@ type Message struct {
 }
 
 type ChatCompleteResp struct {
-	ID      string   `json:"id"`
-	Object  string   `json:"object"`
-	Created int      `json:"created"`
-	Choices []Choice `json:"choices"`
-	Usage   Usage    `json:"usage"`
+	ID      string    `json:"id"`
+	Object  string    `json:"object"`
+	Created int       `json:"created"`
+	Choices []*Choice `json:"choices"`
+	Usage   *Usage    `json:"usage"`
 }
 
 type Choice struct {
