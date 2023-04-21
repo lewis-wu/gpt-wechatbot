@@ -43,7 +43,7 @@ func ChatCompletions(question string, userName string, groupId int, isGroup bool
 	if err != nil {
 		return "", err
 	}
-	log.Printf("request gtp chtComplete json string : %v", string(requestData))
+	log.Printf("request gtp chatComplete json string : %v", string(requestData))
 	req, err := http.NewRequest("POST", config.BASEURL+"chat/completions", bytes.NewBuffer(requestData))
 	if err != nil {
 		return "", err
