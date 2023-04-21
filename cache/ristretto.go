@@ -20,7 +20,7 @@ func init() {
 	cache, err = ristretto.NewCache(&ristretto.Config{
 		NumCounters: 1e7,     // Num keys to track frequency of (10M).
 		MaxCost:     1 << 30, // Maximum cost of cache (1GB).
-		BufferItems: 64,      // Number of keys per Get buffer.
+		BufferItems: 1000,    // Number of keys per Get buffer.
 	})
 	if err != nil {
 		panic(err)
