@@ -59,7 +59,7 @@ func Completions(msg string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	https.AddHeaderFroGpt(req)
+	https.AddHeaderForGpt(req)
 	client := https.GetGptClient()
 	response, err := client.Do(req)
 	if err != nil {

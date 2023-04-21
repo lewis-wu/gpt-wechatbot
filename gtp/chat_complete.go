@@ -43,12 +43,12 @@ func ChatCompletions(question string, userName string, groupId int, isGroup bool
 	if err != nil {
 		return "", err
 	}
-	log.Printf("request gtp chatComplete json string : %v", string(requestData))
+	log.Printf("GPT chatComplete request text:%v", string(requestData))
 	req, err := http.NewRequest("POST", config.BASEURL+"chat/completions", bytes.NewBuffer(requestData))
 	if err != nil {
 		return "", err
 	}
-	https.AddHeaderFroGpt(req)
+	https.AddHeaderForGpt(req)
 	client := https.GetGptClient()
 
 	response, err := client.Do(req)
@@ -74,6 +74,7 @@ func ChatCompletions(question string, userName string, groupId int, isGroup bool
 			cache.AddChatHistory(key, choice.Message)
 		}
 	}
+	log.Printf("GPT chatComplete response text: %s \n", reply)
 	return reply, nil
 
 }
