@@ -14,7 +14,7 @@ import (
 	"strings"
 )
 
-func ChatCompletions(question string, userName string, groupId int, isGroup bool) (string, error) {
+func ChatCompletions(question string, userName string, groupId string, isGroup bool) (string, error) {
 	messages := make([]*dto.Message, 0, 10)
 	key := buildCacheKey(userName, groupId, isGroup)
 	chatHistory, b := cache.GetChatHistory(key)
@@ -78,9 +78,9 @@ func ChatCompletions(question string, userName string, groupId int, isGroup bool
 	return reply, nil
 
 }
-func buildCacheKey(userName string, groupId int, isGroup bool) string {
+func buildCacheKey(userName string, groupId string, isGroup bool) string {
 	if isGroup {
-		return fmt.Sprintf("room:%d:%s", groupId, userName)
+		return fmt.Sprintf("room:%s:%s", groupId, userName)
 	} else {
 		return fmt.Sprintf("single:%s", userName)
 	}
