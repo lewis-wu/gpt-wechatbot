@@ -14,14 +14,18 @@ import (
 	"strings"
 )
 
+const maxTokens = 4000
+
 func ChatCompletions(question string, userName string, groupId string, isGroup bool) (string, error) {
+	historyMaxToken := maxTokens - len(question)
+	if historyMaxToken < 0 {
+		return "提问文本超过了最大字数，无法回答", nil
+	}
 	messages := make([]*dto.Message, 0, 10)
 	key := buildCacheKey(userName, groupId, isGroup)
 	chatHistory, ok := cache.GetChatHistory(key)
 	if ok {
-		for _, s := range chatHistory {
-			messages = append(messages, s)
-		}
+		messages = buildUseChatHistory(chatHistory, historyMaxToken, messages)
 	}
 	curMessage := &dto.Message{
 		Role:    "user",
@@ -31,7 +35,6 @@ func ChatCompletions(question string, userName string, groupId string, isGroup b
 	reqBody := dto.ChatCompleteReq{
 		Model:            "gpt-3.5-turbo",
 		Messages:         messages,
-		MaxTokens:        3000,
 		Temperature:      0.7,
 		TopP:             1,
 		FrequencyPenalty: 0,
@@ -65,6 +68,10 @@ func ChatCompletions(question string, userName string, groupId string, isGroup b
 	if err != nil {
 		return "", err
 	}
+	if chatCompleteResp.Choices == nil || len(chatCompleteResp.Choices) == 0 {
+		log.Printf("GPT chatComplete response error: %s \n", string(body))
+		return "上下文字数可能超出限制了，chatGPT无法响应", nil
+	}
 	//成功获取结果才将question放到上下文中
 	cache.AddChatHistory(key, curMessage)
 	var reply = ""
@@ -77,6 +84,30 @@ func ChatCompletions(question string, userName string, groupId string, isGroup b
 	log.Printf("GPT chatComplete response text: %s \n", reply)
 	return reply, nil
 
+}
+
+func buildUseChatHistory(chatHistory []*dto.Message, historyMaxToken int, messages []*dto.Message) []*dto.Message {
+	if len(chatHistory) == 0 {
+		return messages
+	}
+	historyTokenCount := 0
+	usedHistory := make([]*dto.Message, 0, len(chatHistory))
+	for i := len(chatHistory) - 1; i >= 0; i-- {
+		message := chatHistory[i]
+		historyTokenCount += len(message.Content)
+		if historyMaxToken-historyTokenCount < 0 {
+			break
+		}
+		usedHistory = append(usedHistory, message)
+	}
+	if len(usedHistory) == 0 {
+		return messages
+	}
+
+	for i := len(usedHistory) - 1; i >= 0; i-- {
+		messages = append(messages, usedHistory[i])
+	}
+	return messages
 }
 func buildCacheKey(userName string, groupId string, isGroup bool) string {
 	if isGroup {
