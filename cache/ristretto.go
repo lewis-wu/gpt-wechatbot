@@ -8,7 +8,7 @@ import (
 )
 
 const SingleKeyCost = 1
-const DefaultTTLTime = 5 * time.Minute
+const DefaultTTLTime = 1 * time.Hour
 const DefaultChatMaxContext = 2
 
 var cache *ristretto.Cache
@@ -20,7 +20,7 @@ func init() {
 	cache, err = ristretto.NewCache(&ristretto.Config{
 		NumCounters: 1e7,     // Num keys to track frequency of (10M).
 		MaxCost:     1 << 30, // Maximum cost of cache (1GB).
-		BufferItems: 1000,    // Number of keys per Get buffer.
+		BufferItems: 64,      // Number of keys per Get buffer.
 	})
 	if err != nil {
 		panic(err)
@@ -36,11 +36,13 @@ func init() {
 	if ttlTime <= 0 {
 		chatTTLTime = DefaultTTLTime
 	} else {
-		chatTTLTime = time.Duration(ttlTime) * time.Minute
+		chatTTLTime = time.Duration(ttlTime) * time.Hour
 	}
 }
 
 func GetChatHistory(key string) ([]*dto.Message, bool) {
+	lock(key)
+	defer unLock(key)
 	lr, ok := cache.Get(key)
 	if !ok {
 		return nil, false
@@ -56,6 +58,8 @@ func GetChatHistory(key string) ([]*dto.Message, bool) {
 	return result, true
 }
 func AddChatHistory(key string, value *dto.Message) {
+	lock(key)
+	defer unLock(key)
 	lr, ok := cache.Get(key)
 	if ok {
 		loopArray := lr.(*LoopArray)

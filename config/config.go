@@ -17,7 +17,7 @@ type Configuration struct {
 	AutoPass       bool   `json:"auto_pass"`
 	Proxy          string `json:"proxy"`
 	ChatMaxContext int    `json:"chat_max_context"` //保存的最大聊天上下文记录数
-	ChatTTLTime    int    `json:"chat_ttl_time"`    //聊天上下文保存的分钟数
+	ChatTTLTime    int    `json:"chat_ttl_time"`    //聊天上下文保存的时间（小时）
 	GptTimeOut     int    `json:"gpt_time_out"`     //gpt接口超时时间（秒）
 }
 

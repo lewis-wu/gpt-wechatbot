@@ -17,8 +17,8 @@ import (
 func ChatCompletions(question string, userName string, groupId string, isGroup bool) (string, error) {
 	messages := make([]*dto.Message, 0, 10)
 	key := buildCacheKey(userName, groupId, isGroup)
-	chatHistory, b := cache.GetChatHistory(key)
-	if b {
+	chatHistory, ok := cache.GetChatHistory(key)
+	if ok {
 		for _, s := range chatHistory {
 			messages = append(messages, s)
 		}
