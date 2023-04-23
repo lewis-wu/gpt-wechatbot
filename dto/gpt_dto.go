@@ -63,3 +63,22 @@ type ImageContent struct {
 	URL     string `json:"url,omitempty"`
 	B64Json string `json:"b64_json,omitempty"`
 }
+
+type TextEditReq struct {
+	Model       string  `json:"model"`
+	Input       string  `json:"input"`
+	Instruction string  `json:"instruction,omitempty"`
+	N           int     `json:"n,omitempty"`
+	Temperature float32 `json:"temperature,omitempty"`
+	TopP        int     `json:"top_p,omitempty"`
+}
+type TextEditResp struct {
+	Object  string            `json:"object"`
+	Created int               `json:"created"`
+	Choices []*TextEditChoice `json:"choices"`
+	Usage   *Usage            `json:"usage"`
+}
+type TextEditChoice struct {
+	Text  string `json:"text"`
+	Index int    `json:"index"`
+}

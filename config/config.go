@@ -20,6 +20,7 @@ type Configuration struct {
 	ChatTTLTime          int    `json:"chat_ttl_time"`          //聊天上下文保存的时间（小时）
 	GptTimeOut           int    `json:"gpt_time_out"`           //gpt接口超时时间（秒）
 	GenerateImageKeyword string `json:"generate_image_keyword"` //生成图片时所需的聊天关键词
+	TextEditKeyword      string `json:"text_edit_keyword"`      //文本编辑的关键词
 }
 
 var config *Configuration
