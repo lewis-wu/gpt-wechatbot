@@ -4,21 +4,22 @@ import (
 	"encoding/json"
 	"log"
 	"os"
+	"strings"
 	"sync"
 )
 
 const BASEURL = "https://api.openai.com/v1/"
+const defaultImageKeyword = "[图片]"
 
 // Configuration 项目配置
 type Configuration struct {
-	// gtp apikey
-	ApiKey string `json:"api_key"`
-	// 自动通过好友
-	AutoPass       bool   `json:"auto_pass"`
-	Proxy          string `json:"proxy"`
-	ChatMaxContext int    `json:"chat_max_context"` //保存的最大聊天上下文记录数
-	ChatTTLTime    int    `json:"chat_ttl_time"`    //聊天上下文保存的时间（小时）
-	GptTimeOut     int    `json:"gpt_time_out"`     //gpt接口超时时间（秒）
+	ApiKey               string `json:"api_key"`                // gtp apikey
+	AutoPass             bool   `json:"auto_pass"`              // 自动通过好友
+	Proxy                string `json:"proxy"`                  //代理 http(s)://xxx.xxx:port
+	ChatMaxContext       int    `json:"chat_max_context"`       //保存的最大聊天上下文记录数
+	ChatTTLTime          int    `json:"chat_ttl_time"`          //聊天上下文保存的时间（小时）
+	GptTimeOut           int    `json:"gpt_time_out"`           //gpt接口超时时间（秒）
+	GenerateImageKeyword string `json:"generate_image_keyword"` //生成图片时所需的聊天关键词
 }
 
 var config *Configuration
@@ -40,6 +41,9 @@ func LoadConfig() *Configuration {
 		if err != nil {
 			log.Fatalf("decode config err: %v", err)
 			return
+		}
+		if len(strings.TrimSpace(config.GenerateImageKeyword)) == 0 {
+			config.GenerateImageKeyword = defaultImageKeyword
 		}
 		//// 如果环境变量有配置，读取环境变量
 		//ApiKey := os.Getenv("ApiKey")

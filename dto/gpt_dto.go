@@ -38,3 +38,28 @@ type Usage struct {
 	CompletionTokens int `json:"completion_tokens"`
 	TotalTokens      int `json:"total_tokens"`
 }
+
+const (
+	IMAGE_SIZE_256      = "256x256"
+	IMAGE_SIZE_512      = "512x512"
+	IMAGE_SIZE_1024     = "1024x1024"
+	IMAGE_FROMAT_URL    = "url"
+	IMAGE_FROMAT_BASE64 = "b64_json"
+)
+
+type CreateImageReq struct {
+	Prompt         string `json:"prompt"`
+	N              int    `json:"n,omitempty"`
+	Size           string `json:"size,omitempty"`
+	ResponseFormat string `json:"response_format,omitempty"`
+	User           string `json:"user,omitempty"`
+}
+
+type ImageResp struct {
+	Created       int             `json:"created"`
+	ImageContents []*ImageContent `json:"data"`
+}
+type ImageContent struct {
+	URL     string `json:"url,omitempty"`
+	B64Json string `json:"b64_json,omitempty"`
+}

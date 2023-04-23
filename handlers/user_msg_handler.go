@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/869413421/wechatbot/config"
 	"github.com/869413421/wechatbot/gtp"
 	"github.com/eatmoreapple/openwechat"
 	"log"
@@ -35,7 +36,12 @@ func (g *UserMessageHandler) ReplyText(msg *openwechat.Message) error {
 	// 向GPT发起请求
 	requestText := strings.TrimSpace(msg.Content)
 	requestText = strings.Trim(msg.Content, "\n")
-	reply, err := gtp.ChatCompletions(requestText, sender.UserName, sender.EncryChatRoomId, false)
+	var reply string
+	if strings.Contains(requestText, config.LoadConfig().GenerateImageKeyword) {
+		reply, err = gtp.GenerateImage(requestText, sender.UserName, sender.EncryChatRoomId, false)
+	} else {
+		reply, err = gtp.ChatCompletions(requestText, sender.UserName, sender.EncryChatRoomId, false)
+	}
 	if err != nil {
 		log.Printf("gtp request error: %v \n", err)
 		msg.ReplyText("机器人神了，我一会发现了就去修。")

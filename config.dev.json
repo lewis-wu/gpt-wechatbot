@@ -4,5 +4,6 @@
   "proxy":"",
   "chat_max_context": 0,
   "chat_ttl_time": 0,
-  "gpt_time_out": 0
+  "gpt_time_out": 0,
+  "generate_image_keyword": ""
 }
