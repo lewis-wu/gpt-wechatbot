@@ -43,8 +43,10 @@ func (g *GroupMessageHandler) ReplyText(msg *openwechat.Message) error {
 	replaceText := "@" + sender.Self.NickName
 	requestText := strings.TrimSpace(strings.ReplaceAll(msg.Content, replaceText, ""))
 	var reply string
-	if strings.Contains(requestText, config.LoadConfig().GenerateImageKeyword) {
+	if strings.HasPrefix(requestText, config.LoadConfig().GenerateImageKeyword) {
 		reply, err = gtp.GenerateImage(requestText, sender.UserName, sender.EncryChatRoomId, true)
+	} else if strings.HasPrefix(requestText, config.LoadConfig().TextEditKeyword) {
+		reply, err = gtp.TextEdit(requestText, sender.UserName, sender.EncryChatRoomId, true)
 	} else {
 		reply, err = gtp.ChatCompletions(requestText, sender.UserName, sender.EncryChatRoomId, true)
 	}

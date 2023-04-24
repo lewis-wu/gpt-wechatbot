@@ -9,13 +9,26 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strings"
 )
 
 func TextEdit(question string, userName string, groupId string, isGroup bool) (string, error) {
+	validQuestion := strings.Replace(question, config.LoadConfig().TextEditKeyword, "", 1)
+	inputInstructSeparatorIndex := strings.Index(validQuestion, config.LoadConfig().TextEditSeparator)
+	var input string
+	var instruction string
+	if inputInstructSeparatorIndex == -1 {
+		input = ""
+		instruction = validQuestion
+	} else {
+		input = validQuestion[:inputInstructSeparatorIndex]
+		instruction = validQuestion[(len(config.LoadConfig().TextEditSeparator) + inputInstructSeparatorIndex):]
+	}
+
 	reqBody := dto.TextEditReq{
-		Model:       "gpt-3.5-turbo",
-		Input:       question,
-		Instruction: "",
+		Model:       "text-davinci-edit-001",
+		Input:       input,
+		Instruction: instruction,
 		Temperature: 0.7,
 		TopP:        1,
 		N:           1,
@@ -41,13 +54,13 @@ func TextEdit(question string, userName string, groupId string, isGroup bool) (s
 	if err != nil {
 		return "", err
 	}
-	textCompleteResp := &dto.TextEditResp{}
-	err = json.Unmarshal(body, textCompleteResp)
+	textEditResp := &dto.TextEditResp{}
+	err = json.Unmarshal(body, textEditResp)
 	if err != nil {
 		return "", err
 	}
 	var reply = ""
-	for _, choice := range textCompleteResp.Choices {
+	for _, choice := range textEditResp.Choices {
 		if len(choice.Text) > 0 {
 			reply += choice.Text
 		}

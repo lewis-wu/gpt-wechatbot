@@ -18,7 +18,7 @@ func lock(key string) {
 func unLock(key string) {
 	m, ok := lockMap.Load(key)
 	if !ok {
-		panic("Lock has released before.")
+		panic("Lock should exist")
 	}
 	atomic.StoreInt32(m.(*int32), 0)
 }

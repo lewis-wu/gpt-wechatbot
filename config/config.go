@@ -10,6 +10,8 @@ import (
 
 const BASEURL = "https://api.openai.com/v1/"
 const defaultImageKeyword = "[图片]"
+const defaultTextEditKeyword = "[TE]"
+const defaultTextEditSeparator = "[TES]"
 
 // Configuration 项目配置
 type Configuration struct {
@@ -21,6 +23,7 @@ type Configuration struct {
 	GptTimeOut           int    `json:"gpt_time_out"`           //gpt接口超时时间（秒）
 	GenerateImageKeyword string `json:"generate_image_keyword"` //生成图片时所需的聊天关键词
 	TextEditKeyword      string `json:"text_edit_keyword"`      //文本编辑的关键词
+	TextEditSeparator    string `json:"text_edit_separator"`    //文本编辑的问题内容/问题建议分隔符
 }
 
 var config *Configuration
@@ -45,6 +48,12 @@ func LoadConfig() *Configuration {
 		}
 		if len(strings.TrimSpace(config.GenerateImageKeyword)) == 0 {
 			config.GenerateImageKeyword = defaultImageKeyword
+		}
+		if len(strings.TrimSpace(config.TextEditKeyword)) == 0 {
+			config.TextEditKeyword = defaultTextEditKeyword
+		}
+		if len(strings.TrimSpace(config.TextEditSeparator)) == 0 {
+			config.TextEditSeparator = defaultTextEditSeparator
 		}
 		//// 如果环境变量有配置，读取环境变量
 		//ApiKey := os.Getenv("ApiKey")

@@ -37,8 +37,10 @@ func (g *UserMessageHandler) ReplyText(msg *openwechat.Message) error {
 	requestText := strings.TrimSpace(msg.Content)
 	requestText = strings.Trim(msg.Content, "\n")
 	var reply string
-	if strings.Contains(requestText, config.LoadConfig().GenerateImageKeyword) {
+	if strings.HasPrefix(requestText, config.LoadConfig().GenerateImageKeyword) {
 		reply, err = gtp.GenerateImage(requestText, sender.UserName, sender.EncryChatRoomId, false)
+	} else if strings.HasPrefix(requestText, config.LoadConfig().TextEditKeyword) {
+		reply, err = gtp.TextEdit(requestText, sender.UserName, sender.EncryChatRoomId, false)
 	} else {
 		reply, err = gtp.ChatCompletions(requestText, sender.UserName, sender.EncryChatRoomId, false)
 	}

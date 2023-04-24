@@ -26,8 +26,10 @@ func NewLoopArray(cap int) *LoopArray {
 
 // Push adds an element to the array
 func (l *LoopArray) Push(x interface{}) {
-	if !atomic.CompareAndSwapInt32(&l.mutex, 0, 1) {
-		return
+	for {
+		if atomic.CompareAndSwapInt32(&l.mutex, 0, 1) {
+			break
+		}
 	}
 	defer atomic.StoreInt32(&l.mutex, 0)
 
