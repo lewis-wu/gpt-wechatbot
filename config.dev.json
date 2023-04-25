@@ -5,5 +5,7 @@
   "chat_max_context": 0,
   "chat_ttl_time": 0,
   "gpt_time_out": 0,
-  "generate_image_keyword": ""
+  "generate_image_keyword": "",
+  "text_edit_keyword":"",
+  "text_edit_separator": ""
 }

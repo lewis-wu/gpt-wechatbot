@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"github.com/869413421/wechatbot/config"
+	"github.com/869413421/wechatbot/pool"
 	"github.com/eatmoreapple/openwechat"
 	"log"
 )
@@ -31,6 +32,10 @@ func init() {
 // Handler 全局处理入口
 func Handler(msg *openwechat.Message) {
 	log.Printf("hadler Received msg : %v", msg.Content)
+	pool.GetPool().Submit(func() { doHandleMsg(msg) })
+}
+
+func doHandleMsg(msg *openwechat.Message) {
 	// 处理群消息
 	if msg.IsSendByGroup() {
 		handlers[GroupHandler].handle(msg)
