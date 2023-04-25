@@ -3,6 +3,7 @@ package gtp
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"github.com/869413421/wechatbot/config"
 	"github.com/869413421/wechatbot/dto"
 	"github.com/869413421/wechatbot/https"
@@ -17,7 +18,7 @@ func GenerateImage(prompt string, userName string, groupId string, isGroup bool)
 		Prompt:         strings.Replace(prompt, config.LoadConfig().GenerateImageKeyword, "", 1),
 		N:              1,
 		Size:           dto.IMAGE_SIZE_1024,
-		ResponseFormat: dto.IMAGE_FROMAT_URL,
+		ResponseFormat: dto.IMAGE_FROMAT_BASE64,
 	}
 	requestData, err := json.Marshal(createImageReq)
 	if err != nil {
@@ -47,13 +48,11 @@ func GenerateImage(prompt string, userName string, groupId string, isGroup bool)
 	var imageURL = ""
 	if genImageResp.Created == 0 {
 		log.Printf("GPT createImage error:%v", string(body))
-		return "可能已触发违禁词，不能正常生成图片", nil
+		return "", errors.New("可能已触发违禁词，不能正常生成图片")
 	}
 	for _, content := range genImageResp.ImageContents {
-		if len(content.URL) > 0 {
-			imageURL += content.URL + "\n"
-		}
+		imageURL = content.B64Json
+		break
 	}
-	log.Printf("GPT createImage response text:%v", string(requestData))
 	return imageURL, nil
 }
