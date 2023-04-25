@@ -70,7 +70,7 @@ func ChatCompletions(question string, userName string, groupId string, isGroup b
 	}
 	if chatCompleteResp.Choices == nil || len(chatCompleteResp.Choices) == 0 {
 		log.Printf("GPT chatComplete response error: %s \n", string(body))
-		return "上下文字数可能超出限制了，chatGPT无法响应", nil
+		return "上下文字数可能超出限制了，或请求太频繁了，chatGPT无法响应", nil
 	}
 	//成功获取结果才将question放到上下文中
 	cache.AddChatHistory(key, curMessage)

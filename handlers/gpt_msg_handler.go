@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"github.com/869413421/wechatbot/config"
 	"github.com/869413421/wechatbot/gtp"
+	"github.com/869413421/wechatbot/limit"
 	"github.com/eatmoreapple/openwechat"
 	"io/ioutil"
 	"log"
@@ -30,7 +31,12 @@ func doHandle(msg *openwechat.Message) {
 			break
 		}
 		if support {
-			handler.handle(msg)
+			sender, _ := msg.Sender()
+			if limit.ShouldLimit(sender.UserName) {
+				msg.ReplyText("请求太频繁，请稍后再使")
+			} else {
+				handler.handle(msg)
+			}
 			break
 		}
 	}

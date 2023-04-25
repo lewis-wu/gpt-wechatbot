@@ -20,34 +20,32 @@ func AddHeaderForGpt(req *http.Request) {
 }
 
 func GetGptClient() *http.Client {
-	if client != nil {
-		return client
-	}
-	if atomic.CompareAndSwapInt32(&mutex, 0, 1) {
+	for {
 		if client != nil {
 			return client
 		}
-		proxy := config.LoadConfig().Proxy
-		timeOut := config.LoadConfig().GptTimeOut
-		if timeOut <= 0 {
-			timeOut = DEFAULT_TIME_OUT
-		}
-		var tmpClient *http.Client
-		if len(proxy) == 0 {
-			tmpClient = &http.Client{
-				Timeout: time.Duration(timeOut) * time.Second,
+		if atomic.CompareAndSwapInt32(&mutex, 0, 1) {
+			proxy := config.LoadConfig().Proxy
+			timeOut := config.LoadConfig().GptTimeOut
+			if timeOut <= 0 {
+				timeOut = DEFAULT_TIME_OUT
 			}
-		} else {
-			proxyAddr, _ := url.Parse(proxy)
-			tmpClient = &http.Client{
-				Timeout: time.Duration(timeOut) * time.Second,
-				Transport: &http.Transport{
-					Proxy: http.ProxyURL(proxyAddr),
-				},
+			var tmpClient *http.Client
+			if len(proxy) == 0 {
+				tmpClient = &http.Client{
+					Timeout: time.Duration(timeOut) * time.Second,
+				}
+			} else {
+				proxyAddr, _ := url.Parse(proxy)
+				tmpClient = &http.Client{
+					Timeout: time.Duration(timeOut) * time.Second,
+					Transport: &http.Transport{
+						Proxy: http.ProxyURL(proxyAddr),
+					},
+				}
 			}
+			client = tmpClient
+			return client
 		}
-		client = tmpClient
-		return client
 	}
-	return client
 }

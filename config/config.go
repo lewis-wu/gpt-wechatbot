@@ -12,6 +12,7 @@ const BASEURL = "https://api.openai.com/v1/"
 const defaultImageKeyword = "[图片]"
 const defaultTextEditKeyword = "[TE]"
 const defaultTextEditSeparator = "[TES]"
+const defaultGptLimitPerMinute = 3
 
 // Configuration 项目配置
 type Configuration struct {
@@ -24,6 +25,7 @@ type Configuration struct {
 	GenerateImageKeyword string `json:"generate_image_keyword"` //生成图片时所需的聊天关键词
 	TextEditKeyword      string `json:"text_edit_keyword"`      //文本编辑的关键词
 	TextEditSeparator    string `json:"text_edit_separator"`    //文本编辑的问题内容/问题建议分隔符
+	GptLimitPerMinute    int    `json:"gpt_limit_per_minute"`   //chat请求限速（每分钟请求次数上限）
 }
 
 var config *Configuration
@@ -54,6 +56,9 @@ func LoadConfig() *Configuration {
 		}
 		if len(strings.TrimSpace(config.TextEditSeparator)) == 0 {
 			config.TextEditSeparator = defaultTextEditSeparator
+		}
+		if config.GptLimitPerMinute <= 0 {
+			config.GptLimitPerMinute = defaultGptLimitPerMinute
 		}
 		//// 如果环境变量有配置，读取环境变量
 		//ApiKey := os.Getenv("ApiKey")
