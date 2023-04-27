@@ -7,6 +7,7 @@ import (
 	"github.com/869413421/wechatbot/gtp"
 	"github.com/869413421/wechatbot/limit"
 	"github.com/eatmoreapple/openwechat"
+	"image/jpeg"
 	"io/ioutil"
 	"log"
 	"os"
@@ -308,7 +309,24 @@ func needImgVar(msg *openwechat.Message, isGroup bool) (bool, error) {
 }
 func (handler *imageVariationMessageHandler) handle(msg *openwechat.Message) {
 	sender, _ := msg.Sender()
-	imageBase64, err := gtp.ImageVariation(msg, sender.UserName, sender.EncryChatRoomId, msg.IsSendByGroup())
+	picture, err := msg.GetPicture()
+	if err != nil {
+		log.Fatalf("获取微信图片失败,error=>%v", err)
+		msg.ReplyText("机器人神了，我一会发现了就去修。")
+		return
+	}
+	if picture.StatusCode != 200 {
+		log.Fatalf("获取微信图片失败")
+		msg.ReplyText("机器人神了，我一会发现了就去修。")
+		return
+	}
+
+	jpgImg, err := jpeg.Decode(picture.Body)
+	if err != nil {
+		log.Fatalf("微信图片转为jpg失败, error=>%v", err)
+		msg.ReplyText("机器人神了，我一会发现了就去修。")
+	}
+	imageBase64, err := gtp.ImageVariation(jpgImg, sender.UserName, sender.EncryChatRoomId, msg.IsSendByGroup())
 	if err != nil {
 		log.Printf("gtp request error: %v \n", err)
 		msg.ReplyText("机器人神了，我一会发现了就去修。")

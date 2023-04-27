@@ -9,13 +9,13 @@ import (
 	"os"
 )
 
-func Jpg2PngAndResize(jpegImg image.Image, width, height int, needResize bool) (string, error) {
+func Jpg2PngAndResize(jpegImg image.Image, width, height int) (string, error) {
 	var pngImg image.Image
-	if needResize {
-		// 调整图像大小
-		pngImg = resize(jpegImg, width, height)
-	} else {
+	bounds := jpegImg.Bounds()
+	if bounds.Dx() == width && bounds.Dy() == height {
 		pngImg = jpegImg
+	} else {
+		pngImg = resize(jpegImg, width, height)
 	}
 	// 创建PNG文件
 	pngFile, err := ioutil.TempFile(os.TempDir(), "image_variation*.png")

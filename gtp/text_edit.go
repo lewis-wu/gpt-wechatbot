@@ -38,7 +38,7 @@ func TextEdit(question string, userName string, groupId string, isGroup bool) (s
 	if err != nil {
 		return "", err
 	}
-	log.Printf("GPT textComplete request text:%v", string(requestData))
+	log.Printf("GPT textEdit request text:%v", string(requestData))
 	req, err := http.NewRequest("POST", config.BASEURL+"edits", bytes.NewBuffer(requestData))
 	if err != nil {
 		return "", err
@@ -66,7 +66,7 @@ func TextEdit(question string, userName string, groupId string, isGroup bool) (s
 		}
 	}
 
-	log.Printf("GPT textComplete response text: %s \n", reply)
+	log.Printf("GPT textEdit response text: %s \n", reply)
 	return reply, nil
 
 }
