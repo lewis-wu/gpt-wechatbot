@@ -16,7 +16,7 @@ import (
 )
 
 func ImageVariation(jpgImg image.Image, userName string, groupId string, isGroup bool) (string, error) {
-	pngPath, err := util.Jpg2PngAndResize(jpgImg, 1024, 1024)
+	pngPath, err := util.Jpg2PngAndResize(jpgImg, 1024)
 	if err != nil {
 		return "", err
 	}
