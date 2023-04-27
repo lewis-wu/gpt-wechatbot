@@ -3,11 +3,10 @@ package gtp
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"github.com/869413421/wechatbot/cache"
 	"github.com/869413421/wechatbot/config"
 	"github.com/869413421/wechatbot/dto"
-	"github.com/869413421/wechatbot/https"
+	"github.com/869413421/wechatbot/util"
 	"io"
 	"log"
 	"net/http"
@@ -22,7 +21,7 @@ func ChatCompletions(question string, userName string, groupId string, isGroup b
 		return "提问文本超过了最大字数，无法回答", nil
 	}
 	messages := make([]*dto.Message, 0, 10)
-	key := buildCacheKey(userName, groupId, isGroup)
+	key := cache.BuildChatHistoryCacheKey(userName, groupId, isGroup)
 	chatHistory, ok := cache.GetChatHistory(key)
 	if ok {
 		messages = buildUseChatHistory(chatHistory, historyMaxToken, messages)
@@ -51,8 +50,8 @@ func ChatCompletions(question string, userName string, groupId string, isGroup b
 	if err != nil {
 		return "", err
 	}
-	https.AddHeaderForGpt(req)
-	client := https.GetGptClient()
+	util.AddHeaderForGpt(req)
+	client := util.GetGptClient()
 
 	response, err := client.Do(req)
 	if err != nil {
@@ -108,11 +107,4 @@ func buildUseChatHistory(chatHistory []*dto.Message, historyMaxToken int, messag
 		messages = append(messages, usedHistory[i])
 	}
 	return messages
-}
-func buildCacheKey(userName string, groupId string, isGroup bool) string {
-	if isGroup {
-		return fmt.Sprintf("room:%s:%s", groupId, userName)
-	} else {
-		return fmt.Sprintf("single:%s", userName)
-	}
 }

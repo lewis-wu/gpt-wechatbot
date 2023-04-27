@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"fmt"
 	"github.com/869413421/wechatbot/config"
 	"github.com/869413421/wechatbot/dto"
 	"github.com/dgraph-io/ristretto"
@@ -8,12 +9,10 @@ import (
 )
 
 const SingleKeyCost = 1
-const DefaultTTLTime = 1 * time.Hour
-const DefaultChatMaxContext = 2
 
 var cache *ristretto.Cache
-var chatMaxContext int
-var chatTTLTime time.Duration
+
+const SHARED_VALUE = "SHARED_VALUE"
 
 func init() {
 	var err error
@@ -24,19 +23,6 @@ func init() {
 	})
 	if err != nil {
 		panic(err)
-	}
-
-	num := config.LoadConfig().ChatMaxContext
-	if num <= 0 {
-		chatMaxContext = DefaultChatMaxContext
-	} else {
-		chatMaxContext = num
-	}
-	ttlTime := config.LoadConfig().ChatTTLTime
-	if ttlTime <= 0 {
-		chatTTLTime = DefaultTTLTime
-	} else {
-		chatTTLTime = time.Duration(ttlTime) * time.Hour
 	}
 }
 
@@ -57,6 +43,7 @@ func GetChatHistory(key string) ([]*dto.Message, bool) {
 	}
 	return result, true
 }
+
 func AddChatHistory(key string, value *dto.Message) {
 	lock(key)
 	defer unLock(key)
@@ -66,7 +53,33 @@ func AddChatHistory(key string, value *dto.Message) {
 		loopArray.Push(value)
 		return
 	}
-	la := NewLoopArray(chatMaxContext)
+	la := NewLoopArray(config.LoadConfig().ChatMaxContext)
 	la.Push(value)
-	cache.SetWithTTL(key, la, SingleKeyCost, chatTTLTime)
+	ttl := time.Duration(config.LoadConfig().ChatTTLTime) * time.Minute
+	cache.SetWithTTL(key, la, SingleKeyCost, ttl)
+}
+
+func BuildChatHistoryCacheKey(userName string, groupId string, isGroup bool) string {
+	if isGroup {
+		return fmt.Sprintf("room:%s:%s", groupId, userName)
+	} else {
+		return fmt.Sprintf("single:%s", userName)
+	}
+}
+
+func AddImageVar(key string) {
+	ttl := time.Duration(config.LoadConfig().ImageVariationChatTTL) * time.Second
+	cache.SetWithTTL(key, SHARED_VALUE, SingleKeyCost, ttl)
+}
+func GetImageVar(key string) bool {
+	_, ok := cache.Get(key)
+	cache.Del(key)
+	return ok
+}
+func BuildImageVarCacheKey(userName string, groupId string, isGroup bool) string {
+	if isGroup {
+		return fmt.Sprintf("image_var:room:%s:%s", groupId, userName)
+	} else {
+		return fmt.Sprintf("image_var:single:%s", userName)
+	}
 }

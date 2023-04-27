@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"github.com/869413421/wechatbot/config"
 	"github.com/869413421/wechatbot/dto"
-	"github.com/869413421/wechatbot/https"
+	"github.com/869413421/wechatbot/util"
 	"io"
 	"log"
 	"net/http"
@@ -43,8 +43,8 @@ func TextEdit(question string, userName string, groupId string, isGroup bool) (s
 	if err != nil {
 		return "", err
 	}
-	https.AddHeaderForGpt(req)
-	client := https.GetGptClient()
+	util.AddHeaderForGpt(req)
+	client := util.GetGptClient()
 	response, err := client.Do(req)
 	if err != nil {
 		return "", err

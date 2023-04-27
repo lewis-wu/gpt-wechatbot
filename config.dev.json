@@ -8,5 +8,7 @@
   "generate_image_keyword": "",
   "text_edit_keyword":"",
   "text_edit_separator": "",
-  "gpt_limit_per_minute": 0
+  "gpt_limit_per_minute": 0,
+  "image_variation_keyword": "",
+  "image_variation_chat_ttl": 0
 }
