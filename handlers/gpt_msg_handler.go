@@ -4,7 +4,7 @@ import (
 	"encoding/base64"
 	"github.com/869413421/wechatbot/cache"
 	"github.com/869413421/wechatbot/config"
-	"github.com/869413421/wechatbot/gtp"
+	"github.com/869413421/wechatbot/gpt"
 	"github.com/869413421/wechatbot/limit"
 	"github.com/869413421/wechatbot/util"
 	"github.com/eatmoreapple/openwechat"
@@ -95,9 +95,9 @@ func (handler *chatCompleteMessageHandler) handle(msg *openwechat.Message) {
 		log.Printf("buildRequestPurgeContent error : %v", err)
 	}
 	sender, _ := msg.Sender()
-	reply, err := gtp.ChatCompletions(reqContent, sender.UserName, sender.EncryChatRoomId, isGroup)
+	reply, err := gpt.ChatCompletions(reqContent, sender.UserName, sender.EncryChatRoomId, isGroup)
 	if err != nil {
-		log.Printf("gtp request error: %v \n", err)
+		log.Printf("gpt request error: %v \n", err)
 		msg.ReplyText("机器人神了，我一会发现了就去修。")
 		return
 	}
@@ -185,9 +185,9 @@ func (handler *textEditMessageHandler) handle(msg *openwechat.Message) {
 		log.Printf("buildRequestPurgeContent error : %v", err)
 	}
 	sender, _ := msg.Sender()
-	reply, err := gtp.TextEdit(reqContent, sender.UserName, sender.EncryChatRoomId, isGroup)
+	reply, err := gpt.TextEdit(reqContent, sender.UserName, sender.EncryChatRoomId, isGroup)
 	if err != nil {
-		log.Printf("gtp request error: %v \n", err)
+		log.Printf("gpt request error: %v \n", err)
 		msg.ReplyText("机器人神了，我一会发现了就去修。")
 		return
 	}
@@ -227,9 +227,9 @@ func (handler *imageCreateMessageHandler) handle(msg *openwechat.Message) {
 		log.Printf("buildRequestPurgeContent error : %v", err)
 	}
 	sender, _ := msg.Sender()
-	imageBase64, err := gtp.GenerateImage(reqContent, sender.UserName, sender.EncryChatRoomId, isGroup)
+	imageBase64, err := gpt.GenerateImage(reqContent, sender.UserName, sender.EncryChatRoomId, isGroup)
 	if err != nil {
-		log.Printf("gtp request error: %v \n", err)
+		log.Printf("gpt request error: %v \n", err)
 		msg.ReplyText("机器人神了，我一会发现了就去修。")
 		return
 	}
@@ -327,9 +327,9 @@ func (handler *imageVariationMessageHandler) handle(msg *openwechat.Message) {
 		log.Printf("微信图片转为jpg失败, error=>%v\n", err)
 		msg.ReplyText("机器人神了，我一会发现了就去修。")
 	}
-	imageBase64, err := gtp.ImageVariation(jpgImg, sender.UserName, sender.EncryChatRoomId, msg.IsSendByGroup())
+	imageBase64, err := gpt.ImageVariation(jpgImg, sender.UserName, sender.EncryChatRoomId, msg.IsSendByGroup())
 	if err != nil {
-		log.Printf("gtp request error=> %v \n", err)
+		log.Printf("gpt request error=> %v \n", err)
 		msg.ReplyText("机器人神了，我一会发现了就去修。")
 		return
 	}

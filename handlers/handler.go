@@ -6,30 +6,15 @@ import (
 	"log"
 )
 
-// MessageHandlerInterface 消息处理接口
-type MessageHandlerInterface interface {
-	handle(*openwechat.Message) error
-	ReplyText(*openwechat.Message) error
-}
-
-type HandlerType string
-
-const (
-	GroupHandler = "group"
-	UserHandler  = "user"
-)
-
-// handlers 所有消息类型类型的处理器
-var handlers map[HandlerType]MessageHandlerInterface
-
-func init() {
-	handlers = make(map[HandlerType]MessageHandlerInterface)
-	handlers[GroupHandler] = NewGroupMessageHandler()
-	handlers[UserHandler] = NewUserMessageHandler()
-}
-
 // Handler 全局处理入口
 func Handler(msg *openwechat.Message) {
-	log.Printf("handler Received msg : %v", msg.Content)
-	pool.GetPool().Submit(func() { doHandle(msg) })
+	if msg.IsText() {
+		log.Printf("handler received text msg => %v", msg.Content)
+	} else {
+		log.Printf("handler received non text msg, msg type => %v", msg.MsgType)
+	}
+
+	if err := pool.GetPool().Submit(func() { doHandle(msg) }); err != nil {
+		log.Printf("submit to ants pool error => %v", err)
+	}
 }

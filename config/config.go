@@ -15,16 +15,16 @@ const defaultTextEditSeparator = "[TES]"
 const defaultGptLimitPerMinute = 3
 const defaultImageVariationKeyword = "[PV]"
 const defaultImageVariationChatTTL = 60
-const DefaultTTLTime = 10
-const DefaultChatMaxContext = 2
-const DEFAULT_TIME_OUT = 60
+const defaultTTLTime = 10
+const defaultChatMaxContext = 2
+const defaultTimeOut = 60
 
 var config *Configuration
 var once sync.Once
 
 // Configuration 项目配置
 type Configuration struct {
-	ApiKey                string `json:"api_key"`                  // gtp apikey
+	ApiKey                string `json:"api_key"`                  // gpt apikey
 	AutoPass              bool   `json:"auto_pass"`                // 自动通过好友
 	Proxy                 string `json:"proxy"`                    //代理 http(s)://xxx.xxx:port
 	ChatMaxContext        int    `json:"chat_max_context"`         //保存的最大聊天上下文记录数
@@ -71,16 +71,16 @@ func LoadConfig() *Configuration {
 			config.ImageVariationKeyword = defaultImageVariationKeyword
 		}
 		if config.ChatMaxContext <= 0 {
-			config.ChatMaxContext = DefaultChatMaxContext
+			config.ChatMaxContext = defaultChatMaxContext
 		}
 		if config.ChatTTLTime <= 0 {
-			config.ChatTTLTime = DefaultTTLTime
+			config.ChatTTLTime = defaultTTLTime
 		}
 		if config.ImageVariationChatTTL <= 0 {
 			config.ImageVariationChatTTL = defaultImageVariationChatTTL
 		}
 		if config.GptTimeOut <= 0 {
-			config.GptTimeOut = DEFAULT_TIME_OUT
+			config.GptTimeOut = defaultTimeOut
 		}
 		//// 如果环境变量有配置，读取环境变量
 		//ApiKey := os.Getenv("ApiKey")

@@ -1,4 +1,4 @@
-package gtp
+package gpt
 
 import (
 	"bytes"
@@ -54,7 +54,7 @@ func Completions(msg string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	log.Printf("request gtp json string : %v", string(requestData))
+	log.Printf("request gpt json string : %v", string(requestData))
 	req, err := http.NewRequest("POST", config.BASEURL+"completions", bytes.NewBuffer(requestData))
 	if err != nil {
 		return "", err

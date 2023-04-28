@@ -12,7 +12,7 @@ const SingleKeyCost = 1
 
 var cache *ristretto.Cache
 
-const SHARED_VALUE = "SHARED_VALUE"
+const sharedValue = "SHARED_VALUE"
 
 func init() {
 	var err error
@@ -69,7 +69,7 @@ func BuildChatHistoryCacheKey(userName string, groupId string, isGroup bool) str
 
 func AddImageVar(key string) {
 	ttl := time.Duration(config.LoadConfig().ImageVariationChatTTL) * time.Second
-	cache.SetWithTTL(key, SHARED_VALUE, SingleKeyCost, ttl)
+	cache.SetWithTTL(key, sharedValue, SingleKeyCost, ttl)
 }
 func GetImageVar(key string) bool {
 	_, ok := cache.Get(key)
