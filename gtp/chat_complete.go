@@ -62,14 +62,14 @@ func ChatCompletions(question string, userName string, groupId string, isGroup b
 	if err != nil {
 		return "", err
 	}
+	if response.StatusCode != 200 {
+		log.Printf("GPT chatComplete response error: %s \n", string(body))
+		return "ChatGPT响应错误", nil
+	}
 	chatCompleteResp := &dto.ChatCompleteResp{}
 	err = json.Unmarshal(body, chatCompleteResp)
 	if err != nil {
 		return "", err
-	}
-	if chatCompleteResp.Choices == nil || len(chatCompleteResp.Choices) == 0 {
-		log.Printf("GPT chatComplete response error: %s \n", string(body))
-		return "上下文字数可能超出限制了，或请求太频繁了，chatGPT无法响应", nil
 	}
 	//成功获取结果才将question放到上下文中
 	cache.AddChatHistory(key, curMessage)

@@ -1,6 +1,7 @@
 package util
 
 import (
+	"bytes"
 	extdraw "golang.org/x/image/draw"
 	"image"
 	"image/color"
@@ -10,7 +11,9 @@ import (
 	"os"
 )
 
-func Jpg2PngAndResize(img image.Image, sideLen int) (string, error) {
+const _4M = 4 * 1024 * 1024
+
+func Jpg2PngAndResize(img image.Image, sideLen int) (*os.File, error) {
 	pngImg := img
 	if img.Bounds().Dy() != img.Bounds().Dx() {
 		pngImg = toSquare(img)
@@ -21,16 +24,57 @@ func Jpg2PngAndResize(img image.Image, sideLen int) (string, error) {
 	// 创建PNG文件
 	pngFile, err := ioutil.TempFile(os.TempDir(), "image_variation*.png")
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	// 保存PNG文件
-	err = png.Encode(pngFile, pngImg)
+	if png.Encode(pngFile, pngImg) != nil {
+		return nil, err
+	}
+	// 强制刷盘PNG文件
+	if err := pngFile.Sync(); err != nil {
+		return nil, err
+	}
+	//将读写偏移量置于文件起始位置
+	if _, err := pngFile.Seek(0, 0); err != nil {
+		return nil, err
+	}
+	fileStat, err := pngFile.Stat()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	//强制写入
-	pngFile.Close()
-	return pngFile.Name(), nil
+	if fileStat.Size() < _4M {
+		return pngFile, nil
+	}
+	//压缩会生成新的图片，所以先将原高分辨率的图片删除
+	os.Remove(pngFile.Name())
+	return compressImg(pngImg)
+
+}
+
+func compressImg(pngImg image.Image) (*os.File, error) {
+	//压缩高分辨率的图片
+	buffer, err := compressPngImage(pngImg, _4M)
+	if err != nil {
+		return nil, err
+
+	}
+	compressPngFile, err := ioutil.TempFile(os.TempDir(), "compress_for_gpt*.png")
+	if err != nil {
+		return nil, err
+
+	}
+	_, err = compressPngFile.Write(buffer.Bytes())
+	if err != nil {
+		return nil, err
+	}
+	// 强制刷盘PNG文件
+	if err := compressPngFile.Sync(); err != nil {
+		return nil, err
+	}
+	//将读写偏移量置于文件起始位置
+	if _, err := compressPngFile.Seek(0, 0); err != nil {
+		return nil, err
+	}
+	return compressPngFile, nil
 }
 
 func toSquare(img image.Image) *image.RGBA {
@@ -66,4 +110,34 @@ func resize(img image.Image, width, height int) image.Image {
 	newImg := image.NewRGBA(image.Rect(0, 0, width, height))
 	extdraw.CatmullRom.Scale(newImg, newImg.Bounds(), img, img.Bounds(), draw.Over, nil)
 	return newImg
+}
+
+func compressPngImage(img image.Image, maxSize int) (*bytes.Buffer, error) {
+	buf := new(bytes.Buffer)
+	err := png.Encode(buf, img)
+	if err != nil {
+		return nil, err
+	}
+	for {
+		// 如果文件大小小于指定大小，则退出循环
+		if buf.Len() < maxSize {
+			break
+		}
+
+		// 对 PNG 数据进行压缩
+		compressedBuf := new(bytes.Buffer)
+		err := png.Encode(compressedBuf, img)
+		if err != nil {
+			return nil, err
+		}
+
+		// 如果压缩后的数据大小大于原始数据大小，则退出循环
+		if compressedBuf.Len() >= buf.Len() {
+			break
+		}
+
+		// 将压缩后的数据保存到内存缓冲区中
+		buf = compressedBuf
+	}
+	return buf, nil
 }

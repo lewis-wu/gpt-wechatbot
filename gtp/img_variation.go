@@ -16,15 +16,12 @@ import (
 )
 
 func ImageVariation(jpgImg image.Image, userName string, groupId string, isGroup bool) (string, error) {
-	pngPath, err := util.Jpg2PngAndResize(jpgImg, 1024)
+	pngFile, err := util.Jpg2PngAndResize(jpgImg, 1024)
 	if err != nil {
 		return "", err
 	}
-	pngFile, err := os.Open(pngPath)
-	if err != nil {
-		return "", err
-	}
-	defer os.Remove(pngPath)
+
+	defer os.Remove(pngFile.Name())
 	req, err := buildRequest(pngFile)
 	if err != nil {
 		return "", err
@@ -39,16 +36,16 @@ func ImageVariation(jpgImg image.Image, userName string, groupId string, isGroup
 	if err != nil {
 		return "", err
 	}
+	if response.StatusCode != 200 {
+		log.Printf("GPT ImageVariation error:%v\n", string(body))
+		return "", errors.New("image variation failed")
+	}
 	variationImageResp := &dto.ImageResp{}
 	err = json.Unmarshal(body, variationImageResp)
 	if err != nil {
 		return "", err
 	}
 	var imageBase64 = ""
-	if variationImageResp.Created == 0 {
-		log.Printf("GPT ImageVariation error:%v", string(body))
-		return "", errors.New("image variation failed")
-	}
 	for _, content := range variationImageResp.ImageContents {
 		imageBase64 = content.B64Json
 		break

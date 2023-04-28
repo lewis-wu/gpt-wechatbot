@@ -40,16 +40,16 @@ func GenerateImage(prompt string, userName string, groupId string, isGroup bool)
 	if err != nil {
 		return "", err
 	}
+	if response.StatusCode != 200 {
+		log.Printf("GPT createImage error:%v", string(body))
+		return "", errors.New("create image failed")
+	}
 	genImageResp := &dto.ImageResp{}
 	err = json.Unmarshal(body, genImageResp)
 	if err != nil {
 		return "", err
 	}
 	var imageURL = ""
-	if genImageResp.Created == 0 {
-		log.Printf("GPT createImage error:%v", string(body))
-		return "", errors.New("可能已触发违禁词，不能正常生成图片")
-	}
 	for _, content := range genImageResp.ImageContents {
 		imageURL = content.B64Json
 		break

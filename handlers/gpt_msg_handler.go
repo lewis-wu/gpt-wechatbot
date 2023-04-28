@@ -35,7 +35,7 @@ func doHandle(msg *openwechat.Message) {
 	for _, handler := range gptMsgHandlerGroup {
 		support, err := handler.isSupport(msg)
 		if err != nil {
-			log.Fatalf("gptMessageHandler#isSupport has error %v", err)
+			log.Printf("gptMessageHandler#isSupport has error %v", err)
 			msg.ReplyText("机器人神了，我一会发现了就去修。")
 			break
 		}
@@ -62,7 +62,7 @@ func (handler *friendAddGptMessageHandler) handle(msg *openwechat.Message) {
 	if config.LoadConfig().AutoPass {
 		_, err := msg.Agree("你好我是基于chatGPT引擎开发的微信机器人，你可以向我提问任何问题。")
 		if err != nil {
-			log.Fatalf("add friend agree error : %v", err)
+			log.Printf("add friend agree error : %v", err)
 			msg.ReplyText("机器人神了，我一会发现了就去修。")
 			return
 		}
@@ -91,7 +91,7 @@ func (handler *chatCompleteMessageHandler) handle(msg *openwechat.Message) {
 	isGroup := msg.IsSendByGroup()
 	reqContent, err := buildRequestPurgeContent(msg, isGroup)
 	if err != nil {
-		log.Fatalf("buildRequestPurgeContent error : %v", err)
+		log.Printf("buildRequestPurgeContent error : %v", err)
 	}
 	sender, _ := msg.Sender()
 	reply, err := gtp.ChatCompletions(reqContent, sender.UserName, sender.EncryChatRoomId, isGroup)
@@ -181,7 +181,7 @@ func (handler *textEditMessageHandler) handle(msg *openwechat.Message) {
 	isGroup := msg.IsSendByGroup()
 	reqContent, err := buildRequestPurgeContent(msg, isGroup)
 	if err != nil {
-		log.Fatalf("buildRequestPurgeContent error : %v", err)
+		log.Printf("buildRequestPurgeContent error : %v", err)
 	}
 	sender, _ := msg.Sender()
 	reply, err := gtp.TextEdit(reqContent, sender.UserName, sender.EncryChatRoomId, isGroup)
@@ -223,7 +223,7 @@ func (handler *imageCreateMessageHandler) handle(msg *openwechat.Message) {
 	isGroup := msg.IsSendByGroup()
 	reqContent, err := buildRequestPurgeContent(msg, isGroup)
 	if err != nil {
-		log.Fatalf("buildRequestPurgeContent error : %v", err)
+		log.Printf("buildRequestPurgeContent error : %v", err)
 	}
 	sender, _ := msg.Sender()
 	imageBase64, err := gtp.GenerateImage(reqContent, sender.UserName, sender.EncryChatRoomId, isGroup)
@@ -232,7 +232,7 @@ func (handler *imageCreateMessageHandler) handle(msg *openwechat.Message) {
 		msg.ReplyText("机器人神了，我一会发现了就去修。")
 		return
 	}
-	pngFile, err := base642png(imageBase64)
+	pngFile, err := base64ToPng(imageBase64)
 	if err != nil {
 		log.Printf("base2png failed %v \n", err)
 		msg.ReplyText("机器人神了，我一会发现了就去修。")
@@ -242,7 +242,7 @@ func (handler *imageCreateMessageHandler) handle(msg *openwechat.Message) {
 	msg.ReplyImage(pngFile)
 }
 
-func base642png(imageBase64 string) (*os.File, error) {
+func base64ToPng(imageBase64 string) (*os.File, error) {
 	imageData, err := base64.StdEncoding.DecodeString(imageBase64)
 	if err != nil {
 		return nil, err
@@ -311,28 +311,28 @@ func (handler *imageVariationMessageHandler) handle(msg *openwechat.Message) {
 	sender, _ := msg.Sender()
 	picture, err := msg.GetPicture()
 	if err != nil {
-		log.Fatalf("获取微信图片失败,error=>%v", err)
+		log.Printf("获取微信图片失败,error=>%v\n", err)
 		msg.ReplyText("机器人神了，我一会发现了就去修。")
 		return
 	}
 	if picture.StatusCode != 200 {
-		log.Fatalf("获取微信图片失败")
+		log.Println("获取微信图片失败")
 		msg.ReplyText("机器人神了，我一会发现了就去修。")
 		return
 	}
 
 	jpgImg, err := jpeg.Decode(picture.Body)
 	if err != nil {
-		log.Fatalf("微信图片转为jpg失败, error=>%v", err)
+		log.Printf("微信图片转为jpg失败, error=>%v\n", err)
 		msg.ReplyText("机器人神了，我一会发现了就去修。")
 	}
 	imageBase64, err := gtp.ImageVariation(jpgImg, sender.UserName, sender.EncryChatRoomId, msg.IsSendByGroup())
 	if err != nil {
-		log.Printf("gtp request error: %v \n", err)
+		log.Printf("gtp request error=> %v \n", err)
 		msg.ReplyText("机器人神了，我一会发现了就去修。")
 		return
 	}
-	pngFile, err := base642png(imageBase64)
+	pngFile, err := base64ToPng(imageBase64)
 	if err != nil {
 		log.Printf("base2png failed %v \n", err)
 		msg.ReplyText("机器人神了，我一会发现了就去修。")

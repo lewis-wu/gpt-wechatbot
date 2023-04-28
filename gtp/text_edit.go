@@ -54,6 +54,10 @@ func TextEdit(question string, userName string, groupId string, isGroup bool) (s
 	if err != nil {
 		return "", err
 	}
+	if response.StatusCode != 200 {
+		log.Printf("GPT textEdit response error: %s \n", string(body))
+		return "ChatGPT响应错误", nil
+	}
 	textEditResp := &dto.TextEditResp{}
 	err = json.Unmarshal(body, textEditResp)
 	if err != nil {
