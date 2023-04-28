@@ -21,7 +21,7 @@ func ImageVariation(jpgImg image.Image, userName string, groupId string, isGroup
 		return "", err
 	}
 
-	defer os.Remove(pngFile.Name())
+	defer util.DeleteImage(pngFile)
 	req, err := buildRequest(pngFile)
 	if err != nil {
 		return "", err

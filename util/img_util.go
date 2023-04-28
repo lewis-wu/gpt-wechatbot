@@ -45,9 +45,8 @@ func Jpg2PngAndResize(img image.Image, sideLen int) (*os.File, error) {
 		return pngFile, nil
 	}
 	//压缩会生成新的图片，所以先将原高分辨率的图片删除
-	os.Remove(pngFile.Name())
+	DeleteImage(pngFile)
 	return compressImg(pngImg)
-
 }
 
 func compressImg(pngImg image.Image) (*os.File, error) {
@@ -140,4 +139,9 @@ func compressPngImage(img image.Image, maxSize int) (*bytes.Buffer, error) {
 		buf = compressedBuf
 	}
 	return buf, nil
+}
+
+func DeleteImage(image *os.File) {
+	image.Close()
+	os.Remove(image.Name())
 }

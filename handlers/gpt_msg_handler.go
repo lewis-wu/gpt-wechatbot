@@ -6,6 +6,7 @@ import (
 	"github.com/869413421/wechatbot/config"
 	"github.com/869413421/wechatbot/gtp"
 	"github.com/869413421/wechatbot/limit"
+	"github.com/869413421/wechatbot/util"
 	"github.com/eatmoreapple/openwechat"
 	"image/jpeg"
 	"io/ioutil"
@@ -238,7 +239,7 @@ func (handler *imageCreateMessageHandler) handle(msg *openwechat.Message) {
 		msg.ReplyText("机器人神了，我一会发现了就去修。")
 		return
 	}
-	defer os.Remove(pngFile.Name())
+	defer util.DeleteImage(pngFile)
 	msg.ReplyImage(pngFile)
 }
 
@@ -338,6 +339,6 @@ func (handler *imageVariationMessageHandler) handle(msg *openwechat.Message) {
 		msg.ReplyText("机器人神了，我一会发现了就去修。")
 		return
 	}
-	defer os.Remove(pngFile.Name())
+	defer util.DeleteImage(pngFile)
 	msg.ReplyImage(pngFile)
 }
