@@ -2,6 +2,7 @@ package util
 
 import (
 	"bytes"
+	"encoding/base64"
 	extdraw "golang.org/x/image/draw"
 	"image"
 	"image/color"
@@ -26,7 +27,7 @@ func Jpg2PngAndResize(img image.Image, sideLen int) (*os.File, error) {
 	if err != nil {
 		return nil, err
 	}
-	if png.Encode(pngFile, pngImg) != nil {
+	if err := png.Encode(pngFile, pngImg); err != nil {
 		return nil, err
 	}
 	// 强制刷盘PNG文件
@@ -61,8 +62,7 @@ func compressImg(pngImg image.Image) (*os.File, error) {
 		return nil, err
 
 	}
-	_, err = compressPngFile.Write(buffer.Bytes())
-	if err != nil {
+	if _, err := compressPngFile.Write(buffer.Bytes()); err != nil {
 		return nil, err
 	}
 	// 强制刷盘PNG文件
@@ -125,8 +125,7 @@ func compressPngImage(img image.Image, maxSize int) (*bytes.Buffer, error) {
 
 		// 对 PNG 数据进行压缩
 		compressedBuf := new(bytes.Buffer)
-		err := png.Encode(compressedBuf, img)
-		if err != nil {
+		if err := png.Encode(compressedBuf, img); err != nil {
 			return nil, err
 		}
 
@@ -142,6 +141,25 @@ func compressPngImage(img image.Image, maxSize int) (*bytes.Buffer, error) {
 }
 
 func DeleteImage(image *os.File) {
-	image.Close()
-	os.Remove(image.Name())
+	_ = image.Close()
+	_ = os.Remove(image.Name())
+}
+
+func Base64ToPng(imageBase64 string) (*os.File, error) {
+	imageData, err := base64.StdEncoding.DecodeString(imageBase64)
+	if err != nil {
+		return nil, err
+	}
+	pngFile, err := ioutil.TempFile(os.TempDir(), "gpt_pic*.png")
+	if err != nil {
+		return nil, err
+	}
+	err = ioutil.WriteFile(pngFile.Name(), imageData, 0666)
+	if err != nil {
+		return nil, err
+	}
+	if err := pngFile.Sync(); err != nil {
+		return nil, err
+	}
+	return pngFile, nil
 }

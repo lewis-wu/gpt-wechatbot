@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"encoding/base64"
 	"github.com/869413421/wechatbot/cache"
 	"github.com/869413421/wechatbot/config"
 	"github.com/869413421/wechatbot/gpt"
@@ -9,15 +8,14 @@ import (
 	"github.com/869413421/wechatbot/util"
 	"github.com/eatmoreapple/openwechat"
 	"image/jpeg"
-	"io/ioutil"
 	"log"
-	"os"
 	"strings"
 )
 
 var gptMsgHandlerGroup gptMessageHandlerGroup
 
 type gptMessageHandlerGroup []gptMessageHandler
+
 type gptMessageHandler interface {
 	isSupport(msg *openwechat.Message) (bool, error)
 	handle(msg *openwechat.Message)
@@ -178,6 +176,7 @@ func (handler *textEditMessageHandler) isSupport(msg *openwechat.Message) (bool,
 	}
 	return false, nil
 }
+
 func (handler *textEditMessageHandler) handle(msg *openwechat.Message) {
 	isGroup := msg.IsSendByGroup()
 	reqContent, err := buildRequestPurgeContent(msg, isGroup)
@@ -233,7 +232,7 @@ func (handler *imageCreateMessageHandler) handle(msg *openwechat.Message) {
 		msg.ReplyText("机器人神了，我一会发现了就去修。")
 		return
 	}
-	pngFile, err := base64ToPng(imageBase64)
+	pngFile, err := util.Base64ToPng(imageBase64)
 	if err != nil {
 		log.Printf("base2png failed %v \n", err)
 		msg.ReplyText("机器人神了，我一会发现了就去修。")
@@ -241,22 +240,6 @@ func (handler *imageCreateMessageHandler) handle(msg *openwechat.Message) {
 	}
 	defer util.DeleteImage(pngFile)
 	msg.ReplyImage(pngFile)
-}
-
-func base64ToPng(imageBase64 string) (*os.File, error) {
-	imageData, err := base64.StdEncoding.DecodeString(imageBase64)
-	if err != nil {
-		return nil, err
-	}
-	pngFile, err := ioutil.TempFile(os.TempDir(), "gpt_pic*.png")
-	if err != nil {
-		return nil, err
-	}
-	err = ioutil.WriteFile(pngFile.Name(), imageData, 0666)
-	if err != nil {
-		return nil, err
-	}
-	return pngFile, nil
 }
 
 func isImageCreateFromMsg(msg *openwechat.Message, isGroup bool) (bool, error) {
@@ -278,6 +261,7 @@ func (handler *imageVariationMessageHandler) isSupport(msg *openwechat.Message) 
 	}
 	return false, nil
 }
+
 func needImgVar(msg *openwechat.Message, isGroup bool) (bool, error) {
 	if msg.IsText() {
 		if isGroup && !msg.IsAt() {
@@ -308,6 +292,7 @@ func needImgVar(msg *openwechat.Message, isGroup bool) (bool, error) {
 	}
 	return false, nil
 }
+
 func (handler *imageVariationMessageHandler) handle(msg *openwechat.Message) {
 	sender, _ := msg.Sender()
 	picture, err := msg.GetPicture()
@@ -333,7 +318,7 @@ func (handler *imageVariationMessageHandler) handle(msg *openwechat.Message) {
 		msg.ReplyText("机器人神了，我一会发现了就去修。")
 		return
 	}
-	pngFile, err := base64ToPng(imageBase64)
+	pngFile, err := util.Base64ToPng(imageBase64)
 	if err != nil {
 		log.Printf("base2png failed %v \n", err)
 		msg.ReplyText("机器人神了，我一会发现了就去修。")
