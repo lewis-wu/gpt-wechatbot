@@ -20,11 +20,11 @@ func ChatCompletions(question string, userName string, groupId string, isGroup b
 	if historyMaxToken < 0 {
 		return "提问文本超过了最大字数，无法回答", nil
 	}
-	messages := make([]*dto.Message, 0, 10)
+	messages := make([]*dto.Message, 0, 1)
 	key := cache.BuildChatHistoryCacheKey(userName, groupId, isGroup)
 	chatHistory, ok := cache.GetChatHistory(key)
 	if ok {
-		messages = buildUseChatHistory(chatHistory, historyMaxToken, messages)
+		messages = buildUseChatHistory(chatHistory, historyMaxToken)
 	}
 	curMessage := &dto.Message{
 		Role:    "user",
@@ -85,26 +85,33 @@ func ChatCompletions(question string, userName string, groupId string, isGroup b
 
 }
 
-func buildUseChatHistory(chatHistory []*dto.Message, historyMaxToken int, messages []*dto.Message) []*dto.Message {
+func buildUseChatHistory(chatHistory []*dto.Message, historyMaxToken int) []*dto.Message {
 	if len(chatHistory) == 0 {
-		return messages
+		return make([]*dto.Message, 0, 1)
 	}
 	historyTokenCount := 0
-	usedHistory := make([]*dto.Message, 0, len(chatHistory))
-	for i := len(chatHistory) - 1; i >= 0; i-- {
-		message := chatHistory[i]
-		historyTokenCount += len(message.Content)
+	historyChatStack := util.NewStack(len(chatHistory))
+	for _, message := range chatHistory {
+		historyChatStack.Push(message)
+	}
+	usedHistoryStack := util.NewStack(len(chatHistory))
+
+	for {
+		item, ok := historyChatStack.Pop()
+		if !ok {
+			break
+		}
+		msg := item.(*dto.Message)
+		historyTokenCount += len(msg.Content)
 		if historyMaxToken-historyTokenCount < 0 {
 			break
 		}
-		usedHistory = append(usedHistory, message)
+		usedHistoryStack.Push(item)
 	}
-	if len(usedHistory) == 0 {
-		return messages
+	usedHistory := usedHistoryStack.PopAll()
+	result := make([]*dto.Message, 0, len(usedHistory)+1)
+	for _, msg := range usedHistory {
+		result = append(result, msg.(*dto.Message))
 	}
-
-	for i := len(usedHistory) - 1; i >= 0; i-- {
-		messages = append(messages, usedHistory[i])
-	}
-	return messages
+	return result
 }
