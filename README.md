@@ -14,10 +14,10 @@ chatGPT注册可以参考[这里](https://juejin.cn/post/7173447848292253704)
 # 安装使用
 ``` txt
 # 获取项目
-git clone https://github.com/lewis-wu/wechatbot.git
+git clone https://github.com/lewis-wu/gpt-wechatbot.git
 
 # 进入项目目录
-cd wechatbot
+cd gpt-wechatbot
 
 # 复制配置文件
 copy config.dev.json config.json
@@ -38,7 +38,7 @@ go run main.go
  - gpt_time_out: openai的接口请求超时分钟数，默认值为`60`
  - generate_image_keyword: 图片生成的关键词前缀，默认值是`[P]`,
  - text_edit_keyword: 文本编辑完善的关键词前缀,默认值是`[TE]`
- - text_edit_separator": 文本编辑完善的原文本与完善建议的分隔符,默认值是`[TES]`,
+ - text_edit_separator: 文本编辑完善的原文本与完善建议的分隔符,默认值是`[TES]`,
  - gpt_limit_per_minute: 每人每分钟最多与聊天机器人的互动次数,默认值是`3`
  - image_variation_keyword: 图片变体的关键词，默认值是`[PV]`
  - image_variation_chat_ttl: 在发送图片变体的关键词后，发送源图片的最大间隔时间秒数，默认值是`60`
